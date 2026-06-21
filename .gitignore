@@ -1,0 +1,6 @@
+Dataset/
+/models/
+*.txt
+neuralorbit/
+__pycache__/
+*.pyc
