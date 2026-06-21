@@ -29,6 +29,18 @@
 
 ---
 
+## Checkpoint Download
+
+The model checkpoint files are too large for GitHub and are hosted separately:
+
+**Google Drive folder:** https://drive.google.com/drive/folders/1gzSVD44quln2ZHEjVFXVnLBUSYe_hQIM?usp=drive_link
+
+Download both files and place them in your local project at:
+- `models/hddnet_archive_v2/hddnet_best.pth`
+- `models/baseline_full/baseline_full_best.pth`
+
+These exact paths are required for `predict_roads()` to load correctly.
+
 ## 2. Inference Function
 
 ```python
