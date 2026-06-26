@@ -1,0 +1,393 @@
+/* Cyberpunk Tactical Dashboard Stylesheet - Enhanced */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+:root {
+    --bg-dark: #070f0e;
+    --grid-color: rgba(0, 245, 212, 0.04);
+    --cyan: #00f5d4;
+    --cyan-dim: rgba(0, 245, 212, 0.3);
+    --cyan-glow: rgba(0, 245, 212, 0.15);
+    --gold: #ff9f1c;
+    --gold-dim: rgba(255, 159, 28, 0.3);
+    --text-dim: #7da59a;
+    --text-bright: #e2f1ea;
+    --border-color: rgba(13, 31, 28, 0.8);
+}
+
+.stApp {
+    background-color: var(--bg-dark) !important;
+    background-image: 
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px) !important;
+    background-size: 20px 20px !important;
+    color: var(--text-dim) !important;
+    font-family: 'Share Tech Mono', monospace !important;
+}
+
+header {
+    background-color: transparent !important;
+}
+
+/* ---- Sidebar ---- */
+[data-testid="stSidebar"] {
+    background-color: rgba(5, 11, 10, 0.95) !important;
+    border-right: 1px solid rgba(0, 245, 212, 0.1) !important;
+}
+
+.sidebar-title {
+    color: var(--gold);
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    margin-top: 25px;
+    text-transform: uppercase;
+}
+
+.upload-box {
+    border: 1px dashed var(--cyan-dim);
+    background-color: rgba(0, 245, 212, 0.02);
+    border-radius: 4px;
+    padding: 30px 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.upload-box:hover {
+    border-color: var(--cyan);
+    background-color: rgba(0, 245, 212, 0.05);
+}
+.upload-icon { font-size: 24px; color: var(--cyan); margin-bottom: 10px; }
+
+.meta-panel {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 245, 212, 0.05);
+    border-radius: 4px;
+}
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+.meta-label { color: var(--text-dim); }
+.meta-value { color: var(--text-bright); font-weight: bold; }
+
+/* ---- Tabs (Streamlit native) ---- */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    border-bottom: 2px solid rgba(0, 245, 212, 0.15);
+    padding-bottom: 5px;
+}
+.stTabs [data-baseweb="tab"] {
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    font-weight: bold;
+    color: var(--text-dim) !important;
+    padding: 10px 16px;
+    border-radius: 4px 4px 0 0;
+    background-color: transparent;
+    transition: color 0.2s, background-color 0.2s;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    color: var(--text-bright) !important;
+}
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+    color: var(--cyan) !important;
+    border-bottom: 2px solid var(--cyan);
+    background-color: rgba(0, 245, 212, 0.05);
+}
+
+/* ---- Panels ---- */
+.panel-card {
+    border: 1px solid rgba(0, 245, 212, 0.15);
+    background-color: rgba(4, 9, 8, 0.85);
+    border-radius: 4px;
+    padding: 15px;
+    position: relative;
+    box-shadow: inset 0 0 10px rgba(0, 245, 212, 0.02);
+    margin-bottom: 20px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.panel-card:hover {
+    border-color: rgba(0, 245, 212, 0.4);
+    box-shadow: inset 0 0 10px rgba(0, 245, 212, 0.06);
+}
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.panel-title { color: var(--gold); font-weight: bold; font-size: 12px; letter-spacing: 1px; }
+.panel-tag {
+    font-size: 10px;
+    color: var(--text-dim);
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 2px;
+}
+
+.image-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 1px solid rgba(0, 245, 212, 0.1);
+    background-color: #000;
+}
+.stage-img { width: 100%; height: 100%; object-fit: cover; }
+
+.status-overlay {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(0, 15, 12, 0.85);
+    border: 1px solid var(--cyan-dim);
+    color: var(--cyan);
+    font-size: 10px;
+    padding: 3px 10px;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+.status-overlay.active { box-shadow: 0 0 8px rgba(0, 245, 212, 0.3); }
+
+.svg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* ---- Metrics ---- */
+.metrics-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 35px;
+    padding: 20px;
+    background-color: rgba(6, 13, 12, 0.6);
+    border-top: 1px solid rgba(0, 245, 212, 0.1);
+}
+.metric-item {
+    flex: 1;
+    text-align: left;
+    padding-left: 20px;
+    border-left: 1px solid rgba(0, 245, 212, 0.1);
+}
+.metric-item:first-child { border-left: none; padding-left: 0; }
+.metric-value {
+    font-size: 44px;
+    font-weight: bold;
+    color: var(--cyan);
+    line-height: 1;
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(0, 245, 212, 0.2);
+}
+.metric-value.gold { color: var(--gold); text-shadow: 0 0 10px rgba(255, 159, 28, 0.2); }
+.metric-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* ---- Tables ---- */
+.tactical-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 25px;
+    background-color: rgba(6, 13, 12, 0.5);
+    border: 1px solid rgba(0, 245, 212, 0.1);
+}
+.tactical-table th {
+    background-color: rgba(0, 245, 212, 0.08);
+    color: var(--gold);
+    font-weight: bold;
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 2px solid rgba(0, 245, 212, 0.2);
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+.tactical-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 245, 212, 0.05);
+    font-size: 13px;
+    color: var(--text-bright);
+}
+.tactical-table tr:hover { background-color: rgba(0, 245, 212, 0.03); }
+.gain-positive {
+    color: var(--cyan) !important;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 245, 212, 0.3);
+}
+
+/* ---- Network Analysis Side Panel ---- */
+.side-panel {
+    border: 1px solid rgba(0, 245, 212, 0.15);
+    background-color: rgba(4, 9, 8, 0.85);
+    border-radius: 4px;
+    padding: 18px;
+    height: 560px;
+    overflow-y: auto;
+}
+
+/* ----- Bottleneck Rows (enhanced) ----- */
+.bottleneck-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 245, 212, 0.08);
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+.bottleneck-row:hover {
+    background-color: rgba(0, 245, 212, 0.04);
+}
+.bottleneck-rank {
+    color: var(--gold);
+    font-weight: bold;
+    width: 30px;
+    flex-shrink: 0;
+}
+.bottleneck-name {
+    color: var(--text-bright);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.bottleneck-score {
+    color: var(--cyan);
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+.bottleneck-score.flood {
+    color: var(--gold);
+    text-shadow: 0 0 8px rgba(255, 159, 28, 0.2);
+}
+
+.priority-badge {
+    display: inline-block;
+    border: 1px solid var(--gold-dim);
+    background-color: rgba(255, 159, 28, 0.08);
+    color: var(--gold);
+    font-size: 9px;
+    padding: 2px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ---- Map Panel ---- */
+.map-panel {
+    border: 1px solid rgba(0, 245, 212, 0.15);
+    background-color: rgba(4, 9, 8, 0.85);
+    border-radius: 4px;
+    position: relative;
+    height: 560px;
+    overflow: hidden;
+}
+.map-panel .map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(0, 245, 212, 0.1);
+    background-color: rgba(6, 13, 12, 0.7);
+}
+
+/* ---- Disaster Simulation ---- */
+.sim-readout {
+    border: 1px solid rgba(0, 245, 212, 0.15);
+    background-color: rgba(6, 13, 12, 0.6);
+    padding: 16px;
+    margin-bottom: 14px;
+    border-radius: 4px;
+}
+.sim-readout .sim-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+.sim-readout .sim-value {
+    font-size: 32px;
+    font-weight: bold;
+    line-height: 1;
+}
+.sim-readout .sim-value.cyan { color: var(--cyan); text-shadow: 0 0 10px rgba(0,245,212,0.2); }
+.sim-readout .sim-value.gold { color: var(--gold); text-shadow: 0 0 10px rgba(255,159,28,0.2); }
+.last-mile-alert {
+    border: 1px solid var(--gold-dim);
+    background-color: rgba(255, 159, 28, 0.05);
+    color: var(--gold);
+    padding: 12px 16px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+/* ---- Ghost Roads ---- */
+.ghost-legend {
+    display: flex;
+    gap: 24px;
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(0, 245, 212, 0.1);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.ghost-legend-item { display: flex; align-items: center; gap: 8px; }
+.ghost-swatch {
+    width: 18px;
+    height: 2px;
+    display: inline-block;
+}
+.ghost-swatch.confirmed { background-color: var(--cyan); }
+.ghost-swatch.ghost { 
+    background: none; 
+    border-bottom: 2px dashed var(--gold); 
+}
+.ghost-swatch.absent { background-color: var(--text-dim); opacity: 0.3; }
+.survey-recommendation {
+    border: 1px solid var(--gold-dim);
+    background-color: rgba(255, 159, 28, 0.04);
+    padding: 14px 18px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text-bright);
+    border-radius: 4px;
+}
+
+/* ---- Threshold display ---- */
+.threshold-title {
+    color: var(--gold);
+    letter-spacing: 1px;
+    font-size: 13px;
+    font-weight: bold;
+}
+.threshold-display {
+    border: 1px solid var(--cyan-dim);
+    padding: 5px 15px;
+    color: var(--cyan);
+    font-weight: bold;
+    font-size: 18px;
+    background-color: rgba(0, 245, 212, 0.05);
+    border-radius: 2px;
+    min-width: 60px;
+    text-align: center;
+}
