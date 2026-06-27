@@ -123,3 +123,64 @@ def compute_inverse_ablation(G):
 
     print("✅ inverse ablation done! Saved to outputs/inverse_ablation_results.json")
     return scenarios
+def compute_flood_risk(G, dem_path=None, ndwi_path=None):
+    """
+    Computes flood risk score for each road node.
+    
+    If real elevation (DEM) and water (NDWI) data files are provided, uses them.
+    Otherwise falls back to a simulation using node position.
+    
+    Score formula: betweenness x ndwi_risk x (1 / (elevation + 1))
+    Low elevation + near water + high traffic = highest risk.
+    """
+
+    # Get betweenness centrality for all nodes
+    node_centrality = nx.betweenness_centrality(G, weight='length_m')
+
+    flood_scores = {}
+
+    for node, data in G.nodes(data=True):
+        lat = data.get('lat', 0)
+        lon = data.get('lon', 0)
+        betweenness = node_centrality.get(node, 0)
+
+        if dem_path and ndwi_path:
+            # Real data mode — sample elevation and water risk from raster files
+            try:
+                import rasterio
+                with rasterio.open(dem_path) as dem:
+                    elevation = list(dem.sample([(lon, lat)]))[0][0]
+                with rasterio.open(ndwi_path) as ndwi:
+                    ndwi_risk = list(ndwi.sample([(lon, lat)]))[0][0]
+            except Exception:
+                elevation = 10.0
+                ndwi_risk = 0.5
+        else:
+            # Fallback simulation mode
+            # Nodes near the centre of the map = lower elevation (valley)
+            # Nodes at the edges = higher elevation
+            elevation = abs(lat - 100) + abs(lon - 100)
+            ndwi_risk = 1.0 / (1.0 + elevation / 50)
+
+        # Final flood vulnerability score
+        score = betweenness * ndwi_risk * (1.0 / (elevation + 1))
+        flood_scores[node] = {
+            "node_id":    node,
+            "lat":        lat,
+            "lon":        lon,
+            "elevation":  round(float(elevation), 2),
+            "ndwi_risk":  round(float(ndwi_risk), 4),
+            "betweenness": round(betweenness, 4),
+            "flood_score": round(score, 6)
+        }
+
+    # Sort by highest flood risk
+    ranked = sorted(flood_scores.values(), key=lambda x: x['flood_score'], reverse=True)
+
+    # Save to file
+    os.makedirs("outputs", exist_ok=True)
+    with open("outputs/flood_risk.json", "w") as f:
+        json.dump(ranked, f, indent=2)
+
+    print("✅ flood risk done! Saved to outputs/flood_risk.json")
+    return ranked
