@@ -184,3 +184,74 @@ def compute_flood_risk(G, dem_path=None, ndwi_path=None):
 
     print("✅ flood risk done! Saved to outputs/flood_risk.json")
     return ranked
+def compute_population_vulnerability(G, worldpop_path=None):
+    """
+    Weights each node's vulnerability by how many people depend on it.
+    
+    If a WorldPop raster file is provided, uses real population data.
+    Otherwise simulates population density using node position.
+    
+    Final score: betweenness x population_weight
+    High traffic + many people nearby = Priority Intervention Zone.
+    """
+    import math
+
+    node_centrality = nx.betweenness_centrality(G, weight='length_m')
+
+    pop_scores = {}
+    all_pops = []
+
+    # First pass: get population for every node
+    for node, data in G.nodes(data=True):
+        lat = data.get('lat', 0)
+        lon = data.get('lon', 0)
+
+        if worldpop_path:
+            # Real data mode
+            try:
+                import rasterio
+                with rasterio.open(worldpop_path) as pop:
+                    population = list(pop.sample([(lon, lat)]))[0][0]
+            except Exception:
+                population = 1000.0
+        else:
+            # Fallback simulation — nodes near centre have more people
+            dist_from_centre = ((lat - 100)**2 + (lon - 100)**2) ** 0.5
+            population = max(0, 5000 - (dist_from_centre * 30))
+
+        all_pops.append(population)
+        pop_scores[node] = {"population": population, "lat": lat, "lon": lon}
+
+    # Second pass: normalise and compute final score
+    max_pop = max(all_pops) if all_pops else 1
+
+    results = []
+    for node, pdata in pop_scores.items():
+        betweenness = node_centrality.get(node, 0)
+        pop_weight = math.log1p(pdata['population']) / math.log1p(max_pop)
+        combined_score = betweenness * pop_weight
+
+        results.append({
+            "node_id":        node,
+            "lat":            pdata['lat'],
+            "lon":            pdata['lon'],
+            "population":     round(pdata['population'], 0),
+            "pop_weight":     round(pop_weight, 4),
+            "betweenness":    round(betweenness, 4),
+            "combined_score": round(combined_score, 6)
+        })
+
+    # Sort by highest combined score
+    results = sorted(results, key=lambda x: x['combined_score'], reverse=True)
+
+    # Top 3 are Priority Intervention Zones
+    for i in range(min(3, len(results))):
+        results[i]['priority_zone'] = True
+
+    # Save to file
+    os.makedirs("outputs", exist_ok=True)
+    with open("outputs/population_vulnerability.json", "w") as f:
+        json.dump(results, f, indent=2)
+
+    print("✅ population vulnerability done! Saved to outputs/population_vulnerability.json")
+    return results
