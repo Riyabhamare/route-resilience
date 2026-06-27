@@ -255,3 +255,54 @@ def compute_population_vulnerability(G, worldpop_path=None):
 
     print("✅ population vulnerability done! Saved to outputs/population_vulnerability.json")
     return results
+def run_full_analysis(G, dem_path=None, ndwi_path=None, worldpop_path=None):
+    """
+    Master function — runs all M3 analysis in one call.
+    Member 4 calls this function to get everything.
+    
+    Returns all results and saves all output files.
+    """
+    print("🔍 Starting M3 full analysis...")
+
+    # Step 1: Core graph analysis
+    print("\n[1/4] Running graph analysis...")
+    core = analyze_graph(G)
+
+    # Step 2: Inverse ablation
+    print("\n[2/4] Running inverse ablation (Add-a-Road)...")
+    ablation = compute_inverse_ablation(G)
+
+    # Step 3: Flood risk
+    print("\n[3/4] Running flood risk...")
+    flood = compute_flood_risk(G, dem_path, ndwi_path)
+
+    # Step 4: Population vulnerability
+    print("\n[4/4] Running population vulnerability...")
+    population = compute_population_vulnerability(G, worldpop_path)
+
+    # Package everything together
+    full_result = {
+        "top_bottlenecks":       core["top_bottlenecks"],
+        "critical_edges":        core["critical_edges"],
+        "nrr":                   core["nrr"],
+        "ablation_results":      core["ablation_results"],
+        "add_road_results":      ablation,
+        "flood_risk":            flood,
+        "population_vulnerability": population,
+        "priority_zones":        [r for r in population if r.get("priority_zone")]
+    }
+
+    # Save master summary
+    os.makedirs("outputs", exist_ok=True)
+    with open("outputs/m3_full_report.json", "w") as f:
+        json.dump(full_result, f, indent=2)
+
+    print("\n✅ M3 full analysis complete!")
+    print("📁 Output files saved:")
+    print("   outputs/resilience_report.json")
+    print("   outputs/inverse_ablation_results.json")
+    print("   outputs/flood_risk.json")
+    print("   outputs/population_vulnerability.json")
+    print("   outputs/m3_full_report.json")
+
+    return full_result
