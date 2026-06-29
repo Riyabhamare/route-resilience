@@ -11,7 +11,19 @@ import requests
 import torch
 import torchvision.transforms as transforms
 import networkx as nx
+import json
 
+def load_m3_results():
+    try:
+        with open(PROJECT_ROOT / "outputs" / "m3_full_report.json") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {"top_bottlenecks": [], "add_road_results": [], "ablation_results": [], "priority_zones": []}
+
+@st.cache_data
+def get_m3_data():
+    return load_m3_results()
+    
 # Add project root to path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -598,35 +610,17 @@ with tabs[2]:
         """, unsafe_allow_html=True)
 
     with col_side:
-        bottlenecks = [
-            {"name": "Silk Board Junction", "betweenness": 0.92, "flood_risk": "HIGH"},
-            {"name": "KR Puram Bridge", "betweenness": 0.81, "flood_risk": "MED"},
-            {"name": "Hebbal Flyover", "betweenness": 0.77, "flood_risk": "LOW"},
-            {"name": "Marathahalli Bridge", "betweenness": 0.69, "flood_risk": "HIGH"},
-        ]
+        m3_data = get_m3_data()
+        bottlenecks = m3_data.get("top_bottlenecks", [])
+        priority_ids = {z.get("node_id") for z in m3_data.get("priority_zones", [])}
+
         rows_html = ""
-        for i, b in enumerate(bottlenecks, start=1):
-            score_class = "flood" if b["flood_risk"] == "HIGH" else ""
-            badge = '<span class="priority-badge">Priority Zone</span>' if b["flood_risk"] == "HIGH" else ""
-            rows_html += f"""
-            <div class="bottleneck-row">
-                <span class="bottleneck-rank">{i:02d}</span>
-                <span class="bottleneck-name">{b['name']}{badge}</span>
-                <span class="bottleneck-score {score_class}">{b['betweenness']:.2f}</span>
-            </div>
-            """
-        st.markdown(f"""
-        <div class="side-panel">
-            <div class="panel-title" style="margin-bottom: 12px;">CRITICAL JUNCTIONS</div>
-            {rows_html}
-            <div style="margin-top: 20px; font-size: 11px; color: var(--text-dim); line-height: 1.5;">
-                Ranked by betweenness centrality. Junctions marked
-                <span style="color: var(--gold);">Priority Zone</span> combine high
-                criticality with high flood exposure — recommended first for
-                resilience investment.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        for i, b in enumerate(bottlenecks[:10], start=1):
+            is_priority = b.get("node_id") in priority_ids
+            badge = '<span class="priority-badge">Priority Zone</span>' if is_priority else ""
+            rows_html += f'<div class="bottleneck-row"><span class="bottleneck-rank">{i:02d}</span><span class="bottleneck-name">Node {b.get("node_id")}{badge}</span><span class="bottleneck-score">{b["betweenness"]:.2f}</span></div>'
+
+        st.markdown(f'<div class="side-panel"><div class="panel-title">CRITICAL JUNCTIONS</div>{rows_html}</div>', unsafe_allow_html=True)
 
 # -------------------- TAB 4: DISASTER SIMULATION --------------------
 with tabs[3]:
