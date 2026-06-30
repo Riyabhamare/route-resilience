@@ -8,8 +8,12 @@ import streamlit as st
 import numpy as np
 from PIL import Image, ImageEnhance, ImageDraw, ImageFilter
 import requests
-import torch
-import torchvision.transforms as transforms
+try:
+    import torch
+    import torchvision.transforms as transforms
+    TORCH_OK = True
+except ImportError:
+    TORCH_OK = False
 import networkx as nx
 import json
 
