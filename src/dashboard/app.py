@@ -170,6 +170,8 @@ def preprocess_image(img, size=(512, 512)):
     return transform(img).unsqueeze(0)
 
 def run_inference(img, model_type, threshold=0.5):
+    if not TORCH_OK:
+        return mock_inference(img, threshold, model_type)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if MODULES_OK and hddnet is not None and baseline is not None:
         try:
